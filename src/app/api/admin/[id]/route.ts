@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -7,9 +7,10 @@ const supabase = createClient(
 );
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const body = await request.json();
 
   const { error } = await supabase
@@ -17,7 +18,7 @@ export async function PATCH(
     .update({
       status: body.status,
     })
-    .eq("id", params.id);
+    .eq("id", id);
 
   if (error) {
     return NextResponse.json(
@@ -31,15 +32,16 @@ export async function PATCH(
   });
 }
 
-
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   const { error } = await supabase
     .from("leads")
     .delete()
-    .eq("id", params.id);
+    .eq("id", id);
 
   if (error) {
     return NextResponse.json(
